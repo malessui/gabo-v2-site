@@ -1,14 +1,15 @@
 import React, { useRef, useState } from "react"
 import { StyledOverview, StyledSpan, StyledTechList } from "./styled"
 import { StaticImage } from "gatsby-plugin-image"
+import ReactCanvasConfetti from "react-canvas-confetti"
 import { SEO } from "../seo"
 
 export const Overview = () => {
   const inputRef = useRef<HTMLInputElement>(null)
   const [copied, setCopied] = useState(false)
+  const confettiRef = useRef<any>(null)
 
-
-  const handleCopyToClipboard = () => {
+  const handleCopyToClipboard = (e: React.FormEvent<HTMLButtonElement>) => {
     inputRef.current && inputRef.current.select();
     inputRef.current && inputRef.current.setSelectionRange(0, 99999); /* For mobile devices */
   
@@ -18,10 +19,77 @@ export const Overview = () => {
       setCopied(false)
     }, 1000)
 
+    onOpenChanged(e)
   }
+
+  const makeShot = (particleRatio: number, opts: any) => {
+    confettiRef.current && confettiRef.current({
+      ...opts,
+      origin: { y: 0.7 },
+      particleCount: Math.floor(200 * particleRatio),
+    })
+  }
+
+  const handleEnd = () => {
+    makeShot(0.25, {
+      spread: 26,
+      startVelocity: 55,
+    })
+
+    makeShot(0.2, {
+      spread: 60,
+    })
+
+    makeShot(0.35, {
+      spread: 100,
+      decay: 0.91,
+      scalar: 0.8,
+    })
+
+    makeShot(0.1, {
+      spread: 120,
+      startVelocity: 25,
+      decay: 0.92,
+      scalar: 1.2,
+    })
+
+    makeShot(0.1, {
+      spread: 120,
+      startVelocity: 45,
+    })
+  }
+
+  const getInstance = (instance: any) => {
+    confettiRef.current = instance
+  }
+
+  const canvasStyles = {
+    position: "fixed",
+    pointerEvents: "none",
+    width: "100%",
+    height: "100%",
+    top: 0,
+    left: 0,
+  }
+
+  const onOpenChanged = (e: React.FormEvent<HTMLButtonElement>) => {
+    let timeOut
+    if (e) {
+      timeOut = setTimeout(() => {
+        handleEnd()
+      }, 300)
+    } else {
+      clearTimeout(timeOut)
+    }
+  }
+
   return (
     <StyledOverview className="bg-[#FDF6F7] min-h-screen">
       <SEO/>
+      <ReactCanvasConfetti
+        refConfetti={getInstance}
+        style={canvasStyles as React.CSSProperties}
+      />
       <div className="container max-w-3xl">
         <div className="text-center pb-10 z-20 relative pt-14">
           <h1 className="font-black text-7xl">Gabo <StyledSpan>v2</StyledSpan></h1>
@@ -183,7 +251,7 @@ export const Overview = () => {
               </div>
             </li>
           </StyledTechList>
-          <div className="mt-8">
+          <div className="mt-20">
             <div className="rounded-lg bg-fuchsia-100 inline-block relative">
               <code className="bg-transparent w-full block h-full text-fuchsia-700 px-4 py-2 pr-10">git clone https://github.com/muhrusdi/gabo.git my-site</code>
               <input ref={inputRef} type="text" className="bg-transparent w-full h-full text-fuchsia-700 px-4" hidden value="git clone https://github.com/muhrusdi/gabo.git my-site" />
